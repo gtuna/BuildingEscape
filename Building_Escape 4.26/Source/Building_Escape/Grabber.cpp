@@ -1,8 +1,10 @@
 // Copyright Michael Bridges 2019
 
-
+#include "GameFramework/PlayerController.h"
+#include "Engine/World.h"
 #include "Grabber.h"
 
+#define OUT // This is a macro that is used to define an out parameter.
 
 // Sets default values for this component's properties
 UGrabber::UGrabber()
@@ -28,6 +30,25 @@ void UGrabber::BeginPlay()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// Get the players viewpoint
+	FVector PlayerViewPointLocation;
+	FRotator PlayerViewPointRotation;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint( 
+		OUT PlayerViewPointLocation, 
+		OUT PlayerViewPointRotation
+		);
+
+
+	UE_LOG(LogTemp, Warning, TEXT("Player ViewPoint Location: %s"), *PlayerViewPointLocation.ToString());
+	UE_LOG(LogTemp, Warning, TEXT("Player ViewPoint Rotation: %s"), *PlayerViewPointRotation.ToString());
+
+	//Ray-cast out to reach distance
+	
+
+	// See what we hit
+	FHitResult Hit;
+
 
 	// ...
 }
