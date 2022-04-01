@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Grabber.generated.h"
 
 
@@ -24,6 +25,11 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
-	
+private:
+	float Reach = 100.f;
+	UPhysicsHandleComponent* PhysicsHandle = nullptr; // in the begining of the class, we set the pointer to nullptr . protect us random crashes
+	UInputComponent* InputComponent = nullptr;
+	void Grab();
+	void Release();
+
 };
