@@ -1,9 +1,9 @@
 // Copyright Michael Bridges 2019
 
+#include "Grabber.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
-#include "Grabber.h"
 
 #define OUT // This is a macro that is used to define an out parameter.
 
@@ -13,8 +13,6 @@ UGrabber::UGrabber()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
@@ -23,12 +21,13 @@ void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 
-	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>(); // Find the physics handle component 
-	if (PhysicsHandle != nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s has physics handle component!"), *GetOwner()->GetName());
-	}
+	FindPhysicsHandle();
+	SetupInputComponent();
 
+}
+
+void UGrabber::SetupInputComponent()
+{
 	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
 	if (InputComponent != nullptr)
 	{
@@ -39,31 +38,76 @@ void UGrabber::BeginPlay()
 		// the function = Grab -> addres to the function 
 		// "Grab" is the name of the function that will be called when the action is pressed
 		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab); 
-		
 		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release); 
+	}
+}
+
+void UGrabber::FindPhysicsHandle()
+{
+	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>(); // Find the physics handle component 
+	if (PhysicsHandle != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s has physics handle component!"), *GetOwner()->GetName());
 	}
 }
 
 void UGrabber::Grab()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grab pressed"));
+
+	FHitResult HitResult = GetFirstPhysicsBodyInReach();
+	UPrimitiveComponent* ComponentToGrab = HitResult.GetComponent();
+
+	// TODO only raycast and grab if the player is pressing the grab button
+
+	//  try and reach any actors with physics body collision channel set
+
+	// if we hit something then attach a physics handle
+	if (HitResult.GetActor()){
+		PhysicsHandle->GrabComponentAtLocation(
+			ComponentToGrab,
+			NAME_None,
+			HitResult.GetActor()->GetActorLocation()
+		);
+	}
 }
 
 void UGrabber::Release()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grab released"));
+
+	// remove/release physics handle
+	PhysicsHandle->ReleaseComponent();
+
 }
 
-// Called every frame
+// Called every frame (hot loop)
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (PhysicsHandle == nullptr)
+	/**/
+		FVector PlayerViewPointLocation;
+	FRotator PlayerViewPointRotation;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint( 
+		OUT PlayerViewPointLocation, 
+		OUT PlayerViewPointRotation
+	);
+
+	FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;	
+	/**/
+
+	// if the physics handle is attached
+	if (PhysicsHandle->GrabbedComponent)
 	{
-		return;
+		// move the object that we're holding
+		PhysicsHandle->SetTargetLocation(LineTraceEnd);
 	}
 
+}
+
+FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
+{
 	// Get the players viewpoint
 	FVector PlayerViewPointLocation;
 	FRotator PlayerViewPointRotation;
@@ -72,8 +116,11 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 		OUT PlayerViewPointRotation
 	);
 
-	// draw a line from the player view point to the end of the reach
 	FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
+
+#pragma region DebugDrawing
+	/*
+	// draw a line from the player view point to the end of the reach
 
 	DrawDebugLine(
 		GetWorld(),
@@ -85,6 +132,8 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 		0.f,
 		10.f
 	);
+	*/
+#pragma endregion
 
 	// Seeing what we hit
 	FHitResult Hit;
@@ -116,8 +165,5 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	// 	UE_LOG(LogTemp, Warning, TEXT("Hit nothing!"));
 	// }
 
-
-
-	// ...
+	return Hit;
 }
-
