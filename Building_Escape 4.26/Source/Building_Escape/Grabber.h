@@ -26,9 +26,13 @@ protected:
 
 private:
 	float Reach = 100.f;
+
+	UPROPERTY()
 	UPhysicsHandleComponent* PhysicsHandle = nullptr; // in the begining of the class, we set the pointer to nullptr . protect us random crashes
-	UInputComponent* InputComponent = nullptr;
 	
+	UPROPERTY()
+	UInputComponent* InputComponent = nullptr;
+
 	void Grab();
 	void Release();
 	void FindPhysicsHandle();
