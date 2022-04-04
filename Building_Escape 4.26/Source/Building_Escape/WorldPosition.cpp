@@ -4,6 +4,7 @@
 #include "WorldPosition.h"
 #include "GameFramework/Actor.h"
 
+
 // Sets default values for this component's properties
 UWorldPosition::UWorldPosition()
 {
@@ -20,29 +21,11 @@ void UWorldPosition::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//referance material
-	// FString Log = TEXT("hello");
-	// FString* PtrLog = &Log; // the address of Log
-
-	// Log.Len();
-	// (*PtrLog).Len(); // the same as Log.Len() , dereferencinng the pointer
-	// PtrLog->Len(); // the same as (*PtrLog).Len()  indirect operator , indirection on the left side of the operator
-
-
-
-
-	// UE_LOG(LogTemp, Warning, TEXT("%s"), **PtrLog); // dereferencing the pointer, using overload operator
-
-	FString ObjectName =	GetOwner()->GetName();
-	UE_LOG(LogTemp, Warning, TEXT("This component is atteched to %s"), *GetOwner()->GetName()); // same as above
-
-	FString ObjectPosition = GetOwner()->GetTransform().GetLocation().ToString(); 
-	FString ObjectActorPos = GetOwner()->GetActorLocation().ToString();
-
-	UE_LOG(LogTemp, Warning, TEXT("%s position is %s"), *ObjectName, *ObjectPosition); 
-	UE_LOG(LogTemp, Warning, TEXT("%s position in world %s"), *ObjectName, *ObjectActorPos); 
+	FString ObjectName = GetOwner()->GetName();
 	
-	
+	FString ObjectPosition = GetOwner()->GetActorLocation().ToString();
+
+	UE_LOG(LogTemp, Warning, TEXT("%s postition in world is: %s"), *ObjectName, *ObjectPosition);
 }
 
 
